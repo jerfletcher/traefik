@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  service_https_redirect:
+    labels:
+      #uses .env TRAEFIK_CONFIG_SERVICE, TRAEFIK_CONFIG_HOST
+      #service + https
+      - "traefik.enable=true"
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}-https.rule=Host(`${TRAEFIK_CONFIG_HOST}`)"
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}-https.entrypoints=websecure"
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}-https.tls=true"
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}-https.tls.certresolver=le"
+      #http route + redirect
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}.entrypoints=web"
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}.rule=Host(`${TRAEFIK_CONFIG_HOST}`)"
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}.middlewares=${TRAEFIK_CONFIG_SERVICE}-https-redirect"
+      - "traefik.http.middlewares.${TRAEFIK_CONFIG_SERVICE}-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}-https-redirect.priority=0"
+

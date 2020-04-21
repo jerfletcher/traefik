@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  service_https_redirect:
+    image: "traefik:2.1"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesResolvers.le.acme.email=jamio@0mod.com"
+      - "--certificatesResolvers.le.acme.storage=/acme/acme.json"
+      - "--certificatesResolvers.le.acme.httpChallenge.entryPoint=web"
+      - "--api.dashboard=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - proxy-net
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "traefic_acme:/acme"
+    labels:
+      #add service for API
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}-https.service=api@internal"
+      #auth
+      - "traefik.http.routers.${TRAEFIK_CONFIG_SERVICE}-https.middlewares=${TRAEFIK_CONFIG_SERVICE}-auth"
+      - "traefik.http.middlewares.${TRAEFIK_CONFIG_SERVICE}-auth.basicauth.users=${TRAEFIK_CONFIG_AUTH}"
+
+volumes:
+  traefic_acme:
+
+networks:
+  proxy-net:
+    external:
+      name: proxy-net

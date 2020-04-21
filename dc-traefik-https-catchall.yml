@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  service_https_catchall:
+    labels:
+      #uses .env TRAEFIK_CONFIG_SERVICE, TRAEFIK_CONFIG_HOST
+      - "traefik.http.routers.https-redirect.entrypoints=web"
+      - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
+      - "traefik.http.routers.https-redirect.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+
